@@ -1,7 +1,6 @@
 "use client";
 
 import { signIn, signUp } from "@/app/lib/auth-client";
-import { Check } from "@gravity-ui/icons";
 import {
     Button,
     Description,
@@ -11,105 +10,124 @@ import {
     Label,
     TextField,
 } from "@heroui/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-export default function RenderFunction() {
+export default function SignUpPage() {
+    const router = useRouter();
+    const [errorMsg, setErrorMsg] = useState("");
+
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setErrorMsg("");
         const formData = new FormData(e.currentTarget);
-        const data = Object.fromEntries(formData.entries()) as Record<
-            string,
-            string
-        >;
-        console.log(`Final Practice data : `, data);
+        const data = Object.fromEntries(formData.entries()) as Record<string, string>;
 
-        //Data better auth er kache pathano
-        const { data: finalData, error } = await signUp.email({
+        if (data.password !== data.confirmPassword) {
+            setErrorMsg("পাসওয়ার্ড মিলছে না!");
+            return;
+        }
+
+        const { error } = await signUp.email({
             name: data.name,
             email: data.email,
             password: data.password,
         });
-        console.log(finalData, error);
+
+        if (error) {
+            setErrorMsg(error.message || "Registration failed");
+        } else {
+            router.push("/");
+        }
     };
+
     const handleGoogleSignIn = async () => {
-        const data = await signIn.social({
+        await signIn.social({
             provider: "google",
+            callbackURL: "/",
         });
-        console.log(`After sign in `, data);
+    };
+
+    const handleGithubSignIn = async () => {
+        await signIn.social({
+            provider: "github",
+            callbackURL: "/",
+        });
     };
 
     return (
-        <Form className="flex w-96 flex-col gap-4" onSubmit={onSubmit}>
-            <TextField
-                isRequired
-                name="name"
-                validate={(value) => {
-                    if (value.length < 3) {
-                        return "Name must be at least 3 characters";
-                    }
-                    return null;
-                }}
-            >
-                <Label>Name</Label>
-                <Input placeholder="John Doe" />
-                <FieldError />
-            </TextField>
-            <TextField
-                isRequired
-                name="email"
-                type="email"
-                validate={(value) => {
-                    if (
-                        !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)
-                    ) {
-                        return "Please enter a valid email address";
-                    }
+        <div className="min-h-[85vh] flex flex-col items-center justify-center px-4 py-12">
+            <div className="max-w-md w-full bg-white border rounded-2xl p-8 shadow-sm space-y-6">
+                <div className="text-center space-y-1">
+                    <h1 className="text-2xl font-bold text-gray-900">অ্যাকাউন্ট তৈরি করুন</h1>
+                    <p className="text-xs text-gray-500">বিনামূল্যে সাইন আপ করে সব বিস্তারিত দাম দেখুন।</p>
+                </div>
 
-                    return null;
-                }}
-            >
-                <Label>Email</Label>
-                <Input placeholder="john@example.com" />
-                <FieldError />
-            </TextField>
+                <Form className="flex flex-col gap-4" onSubmit={onSubmit}>
+                    <TextField isRequired name="name">
+                        <Label className="text-sm font-medium text-gray-700">নাম</Label>
+                        <Input placeholder="যেমন: রহিম উদ্দিন" className="w-full border rounded-lg p-2.5 text-sm" />
+                        <FieldError />
+                    </TextField>
 
-            <TextField
-                isRequired
-                minLength={8}
-                name="password"
-                type="password"
-                validate={(value) => {
-                    if (value.length < 8) {
-                        return "Password must be at least 8 characters";
-                    }
-                    if (!/[A-Z]/.test(value)) {
-                        return "Password must contain at least one uppercase letter";
-                    }
-                    if (!/[0-9]/.test(value)) {
-                        return "Password must contain at least one number";
-                    }
+                    <TextField isRequired name="email" type="email">
+                        <Label className="text-sm font-medium text-gray-700">ইমেইল</Label>
+                        <Input placeholder="you@example.com" className="w-full border rounded-lg p-2.5 text-sm" />
+                        <FieldError />
+                    </TextField>
 
-                    return null;
-                }}
-            >
-                <Label>Password</Label>
-                <Input placeholder="Enter your password" />
-                <Description>
-                    Must be at least 8 characters with 1 uppercase and 1 number
-                </Description>
-                <FieldError />
-            </TextField>
+                    <TextField isRequired minLength={8} name="password" type="password">
+                        <Label className="text-sm font-medium text-gray-700">পাসওয়ার্ড</Label>
+                        <Input placeholder="কমপক্ষে ৮ অক্ষর" className="w-full border rounded-lg p-2.5 text-sm" />
+                        <FieldError />
+                    </TextField>
 
-            <div className="flex gap-2">
-                <Button type="submit">
-                    <Check />
-                    Submit
-                </Button>
-                <Button type="reset" variant="secondary">
-                    Reset
-                </Button>
+                    <TextField isRequired minLength={8} name="confirmPassword" type="password">
+                        <Label className="text-sm font-medium text-gray-700">পাসওয়ার্ড নিশ্চিত করুন</Label>
+                        <Input placeholder="আবার লিখুন" className="w-full border rounded-lg p-2.5 text-sm" />
+                        <FieldError />
+                    </TextField>
+
+                    {errorMsg && <p className="text-xs text-red-600 font-medium">{errorMsg}</p>}
+
+                    <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition">
+                        অ্যাকাউন্ট তৈরি করুন
+                    </Button>
+                </Form>
+
+                <div className="text-center text-xs text-gray-400">অথবা</div>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <button
+                        type="button"
+                        onClick={handleGoogleSignIn}
+                        className="border rounded-lg py-2.5 text-xs font-medium hover:bg-gray-50 transition flex items-center justify-center gap-1.5"
+                    >
+                        <span>Google দিয়ে চালিয়ে যান</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleGithubSignIn}
+                        className="border rounded-lg py-2.5 text-xs font-medium hover:bg-gray-50 transition flex items-center justify-center gap-1.5"
+                    >
+                        <span>GitHub দিয়ে চালিয়ে যান</span>
+                    </button>
+                </div>
+
+                <p className="text-center text-xs text-gray-600">
+                    অ্যাকাউন্ট আছে?{" "}
+                    <Link href="/sign-in" className="text-emerald-600 font-semibold hover:underline">
+                        সাইন ইন করুন
+                    </Link>
+                </p>
             </div>
-            <p>Or</p>
-            <Button onClick={handleGoogleSignIn}>Sign up with google</Button>
-        </Form>
+
+            <div className="mt-6">
+                <Link href="/" className="text-xs text-gray-500 hover:text-emerald-600">
+                    ← হোম পেজে ফিরে যান
+                </Link>
+            </div>
+        </div>
     );
 }

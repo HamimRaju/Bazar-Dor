@@ -1,4 +1,8 @@
-export function toBengaliNumber(num: number | string): string {
+export function toBengaliNumber(num: number | string | undefined | null): string {
+  if (num === undefined || num === null || num === "") {
+    return '০';
+  }
+
   const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
   return num
     .toString()

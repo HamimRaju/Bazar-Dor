@@ -25,22 +25,37 @@ export interface Product {
 }
 
 export async function getProducts(): Promise<Product[]> {
-  const res = await fetch(`${BASE_URL}/products`, { next: { revalidate: 0 } });
-  if (!res.ok) throw new Error("Failed to fetch products");
-  const data = await res.json();
-  return data.data || data;
+  try {
+    const res = await fetch(`${BASE_URL}/products`, { cache: 'no-store' });
+    if (!res.ok) throw new Error("Failed to fetch products");
+    const json = await res.json();
+    return json.data || json;
+  } catch (err) {
+    console.error("Products Fetch Error:", err);
+    return [];
+  }
 }
 
 export async function getCategories() {
-  const res = await fetch(`${BASE_URL}/categories`, { next: { revalidate: 0 } });
-  if (!res.ok) throw new Error("Failed to fetch categories");
-  const data = await res.json();
-  return data.data || data;
+  try {
+    const res = await fetch(`${BASE_URL}/categories`, { cache: 'no-store' });
+    if (!res.ok) throw new Error("Failed to fetch categories");
+    const json = await res.json();
+    return json.data || json;
+  } catch (err) {
+    console.error("Categories Fetch Error:", err);
+    return [];
+  }
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const res = await fetch(`${BASE_URL}/products/${slug}`, { next: { revalidate: 0 } });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.data || data;
+  try {
+    const res = await fetch(`${BASE_URL}/products/${slug}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || json;
+  } catch (err) {
+    console.error("Product Slug Fetch Error:", err);
+    return null;
+  }
 }

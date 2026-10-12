@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { authClient } from "@/app/lib/auth-client";
 import { useEffect, useState } from "react";
 import { getProducts, getCategories, Product } from "@/app/lib/api";
-import { toBengaliNumber, formatPrice } from "@/app/lib/utils";
+import { toBengaliNumber } from "@/app/lib/utils";
 
 export default function Navbar() {
   const { data: session } = authClient.useSession();
@@ -25,7 +25,7 @@ export default function Navbar() {
 
   return (
     <header className="border-b bg-white sticky top-0 z-50 shadow-xs">
-      {/* Top Navbar */}
+      {/* Top Bar */}
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="bg-emerald-600 text-white p-2 rounded-xl text-xl font-bold flex items-center justify-center">🛒</div>
@@ -35,7 +35,7 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Auth status / Profile Dropdown */}
+        {/* Auth Buttons / Profile */}
         <div className="relative">
           {session?.user ? (
             <div>
@@ -81,7 +81,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Category Links Row */}
+      {/* Category Links */}
       <div className="border-t border-b py-2 bg-emerald-50/40">
         <div className="max-w-7xl mx-auto px-4 flex items-center gap-4 overflow-x-auto text-sm font-medium scrollbar-none">
           {categories.map((cat) => {
@@ -102,7 +102,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Infinite Scrolling Ticker (Marquee) */}
+      {/* Marquee Ticker */}
       <div className="bg-gray-50 border-b overflow-hidden py-2 text-xs">
         <div className="animate-marquee flex gap-8 items-center">
           {[...products, ...products].map((p, index) => {
