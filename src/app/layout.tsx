@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/app/components/Navbar";
-import Footer from "@/app/components/Footer";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "বাজার দর — প্রয়োজনীয় পণ্যের দাম এক নজরে",
-  description: "নিত্যপ্রয়োজনীয় পণ্যের বাজার দর, দামের ওঠা-নামা এবং বাজারভিত্তিক বিস্তারিত তথ্য।",
+  title: "বাজার দর - প্রয়োজনীয় পণ্যের দাম এক নজরে",
+  description: "Real-time commodity price tracking in Bangladesh",
 };
 
 export default function RootLayout({
@@ -25,14 +25,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="bn"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-gray-50/30 text-gray-900">
-        <Navbar />
-        <div className="flex-1">{children}</div>
-        <Footer />
+    <html lang="bn">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f8faf9] text-gray-900 min-h-screen flex flex-col justify-between`}>
+        <Suspense fallback={null}>
+          <Navbar />
+        </Suspense>
+
+        <div className="flex-grow">{children}</div>
+
+        <footer className="bg-white border-t py-6 text-center text-xs text-gray-400 mt-16">
+          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>বাজার দর — প্রয়োজনীয় পণ্যের দাম এক নজরে।</p>
+            <p>সকল দাম সম্ভাব্য; বাজার অবস্থার ওপর নির্ভর করে পরিবর্তিত হয়।</p>
+          </div>
+        </footer>
       </body>
     </html>
   );
