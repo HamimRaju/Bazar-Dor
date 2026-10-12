@@ -31,7 +31,7 @@ export default function RootLayout({
           <Navbar />
         </Suspense>
 
-        <div className="flex-grow">{children}</div>
+        <div className="grow">{children}</div>
 
         <footer className="bg-white border-t py-6 text-center text-xs text-gray-400 mt-16">
           <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">

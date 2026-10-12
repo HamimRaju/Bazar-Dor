@@ -1,74 +1,97 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { authClient } from "@/app/lib/auth-client";
-import { useState, useEffect, Suspense } from "react";
-import { getCategories } from "@/app/lib/api";
+import { useEffect, useState } from "react";
+import { getProducts, getCategories, Product } from "@/app/lib/api";
+import { toBengaliNumber } from "@/app/lib/utils";
 
-function NavContent() {
+export default function Navbar() {
   const { data: session } = authClient.useSession();
   const pathname = usePathname();
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string; emoji: string }[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
-    getCategories().then((data) => setCategories(data));
+    getProducts().then(setProducts).catch(console.error);
+    getCategories().then(setCategories).catch(console.error);
   }, []);
 
+  const handleSignOut = async () => {
+    await authClient.signOut();
+  };
+
   return (
-    <header className="bg-white border-b sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
+    <header className="border-b bg-white sticky top-0 z-50 shadow-xs">
+      {/* Top Bar */}
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm">
-            🛒
-          </div>
+          <div className="bg-emerald-600 text-white p-2 rounded-xl text-xl font-bold flex items-center justify-center">🛒</div>
           <div>
-            <h1 className="font-bold text-gray-900 leading-none">বাজার দর</h1>
-            <p className="text-[10px] text-gray-400 mt-0.5">মঙ্গলবারের বাজার দর</p>
+            <h1 className="text-xl font-bold text-gray-900 leading-none">বাজার দর</h1>
+            <p className="text-xs text-gray-500 mt-1">মঙ্গলবার, ৬ অক্টোবর, ২০২৬</p>
           </div>
         </Link>
 
-        {/* User Profile / Auth */}
-        <div className="flex items-center gap-3">
+        {/* Auth Buttons / Profile */}
+        <div className="relative">
           {session?.user ? (
-            <Link
-              href="/profile"
-              className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full transition"
-            >
-              <div className="w-7 h-7 rounded-full bg-emerald-100 overflow-hidden relative flex items-center justify-center text-xs font-bold text-emerald-800">
-                {session.user.image ? (
-                  <Image src={session.user.image} alt={session.user.name || "User"} fill className="object-cover" />
-                ) : (
-                  session.user.name?.charAt(0) || "U"
-                )}
-              </div>
-              <span className="text-sm font-medium text-gray-700">{session.user.name}</span>
-            </Link>
+            <div>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 bg-gray-50 border px-3 py-1.5 rounded-full text-sm hover:bg-gray-100 transition"
+              >
+                <span className="font-semibold text-gray-800">{session.user.name}</span>
+                <span className="text-xs">▼</span>
+              </button>
+
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-xl shadow-lg py-2 z-50">
+                  <Link
+                    href="/profile"
+                    onClick={() => setDropdownOpen(false)}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
+                  >
+                    আমার প্রোফাইল
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      handleSignOut();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    সাইন আউট
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
-            <Link
-              href="/sign-in"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm px-4 py-2 rounded-xl transition shadow-xs"
-            >
-              সাইন ইন
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link href="/sign-in" className="text-sm font-medium text-gray-700 hover:text-emerald-600 px-3 py-1.5">
+                সাইন ইন
+              </Link>
+              <Link href="/sign-up" className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition">
+                সাইন আপ
+              </Link>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Category Navigation Bar */}
-      <div className="bg-gray-50 border-t border-gray-100 overflow-x-auto scrollbar-none">
-        <div className="max-w-7xl mx-auto px-4 flex items-center gap-6 h-11 whitespace-nowrap">
+      {/* Category Links */}
+      <div className="border-t border-b py-2 bg-emerald-50/40">
+        <div className="max-w-7xl mx-auto px-4 flex items-center gap-4 overflow-x-auto text-sm font-medium scrollbar-none">
           {categories.map((cat) => {
             const isActive = pathname === `/category/${cat.id}`;
             return (
               <Link
                 key={cat.id}
                 href={`/category/${cat.id}`}
-                className={`flex items-center gap-1.5 text-xs font-medium transition py-1 px-2.5 rounded-lg ${
-                  isActive ? "bg-emerald-600 text-white shadow-xs" : "text-gray-600 hover:text-emerald-600 hover:bg-gray-100"
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full whitespace-nowrap transition ${
+                  isActive ? "bg-emerald-600 text-white font-semibold" : "text-gray-700 hover:bg-emerald-100/60"
                 }`}
               >
                 <span>{cat.emoji}</span>
@@ -78,14 +101,25 @@ function NavContent() {
           })}
         </div>
       </div>
-    </header>
-  );
-}
 
-export default function Navbar() {
-  return (
-    <Suspense fallback={<div className="h-16 bg-white border-b" />}>
-      <NavContent />
-    </Suspense>
+      {/* Marquee Ticker */}
+      <div className="bg-gray-50 border-b overflow-hidden py-2 text-xs">
+        <div className="animate-marquee flex gap-8 items-center">
+          {[...products, ...products].map((p, index) => {
+            const isUp = p.price_change >= 0;
+            return (
+              <Link href={`/product/${p.slug}`} key={`${p.id}-${index}`} className="inline-flex items-center gap-1.5 hover:opacity-75 transition">
+                <span>{p.emoji}</span>
+                <span className="font-semibold text-gray-800">{p.name}</span>
+                <span className="text-gray-600">{toBengaliNumber(p.current_price)} টাকা/{p.unit}</span>
+                <span className={isUp ? "text-emerald-600 font-bold" : "text-red-600 font-bold"}>
+                  {isUp ? "▲" : "▼"} {toBengaliNumber(Math.abs(p.change_percentage))}%
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </header>
   );
 }
