@@ -1,21 +1,43 @@
-import { betterAuth } from "better-auth";
-import { MongoClient } from "mongodb";
-import { mongodbAdapter } from "@better-auth/mongo-adapter";
 
-const client = new MongoClient(process.env.BETTER_AUTH_DB_URL || "mongodb://localhost:27017/database");
+import { betterAuth } from "better-auth";
+import { mongodbAdapter } from "@better-auth/mongo-adapter";
+import { MongoClient } from "mongodb";
+
+const uri =
+  process.env.BETTER_AUTH_DB_URL ||
+  process.env.MONGODB_URI;
+
+if (!uri) {
+  throw new Error("Missing MongoDB connection URL");
+}
+
+const client = new MongoClient(uri);
 const db = client.db("ph-b14-a07");
 
 export const auth = betterAuth({
-    emailAndPassword: {
-        enabled: true,
+  database: mongodbAdapter(db, {
+    client,
+  }),
+
+  secret: process.env.BETTER_AUTH_SECRET,
+
+  baseURL:
+    process.env.BETTER_AUTH_URL ||
+    "http://localhost:3000",
+
+  emailAndPassword: {
+    enabled: true,
+  },
+
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
-    socialProviders: {
-        google: { 
-            clientId: process.env.GOOGLE_CLIENT_ID as string, 
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
-        }, 
-    },
-    database: mongodbAdapter(db, {
-        client,
-    }),
+  },
+
+  trustedOrigins: [
+    "http://localhost:3000",
+    "https://ph-b14-a07.vercel.app",
+  ],
 });
