@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/app/components/Navbar";
+import Footer from "@/app/components/Footer"; // Imported the new footer component
 import { Suspense } from "react";
 
 const geistSans = Geist({
@@ -33,12 +34,8 @@ export default function RootLayout({
 
         <div className="grow">{children}</div>
 
-        <footer className="bg-white border-t py-6 text-center text-xs text-gray-400 mt-16">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p>বাজার দর — প্রয়োজনীয় পণ্যের দাম এক নজরে।</p>
-            <p>সকল দাম সম্ভাব্য; বাজার অবস্থার ওপর নির্ভর করে পরিবর্তিত হয়।</p>
-          </div>
-        </footer>
+        {/* Enhanced Fresh Vegetable-Themed Footer */}
+        <Footer />
       </body>
     </html>
   );
